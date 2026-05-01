@@ -132,8 +132,9 @@ export function InvoiceForm({ mode, invoiceId, initialValues }: InvoiceFormProps
             />
             <Button
               type="submit"
+              variant="primary"
               disabled={isPending}
-              className="bg-slate-900 text-white hover:bg-slate-800 sm:min-w-40"
+              className="sm:min-w-40"
             >
               {isPending ? "Saving..." : mode === "create" ? "Save Invoice" : "Update Invoice"}
             </Button>
@@ -322,8 +323,9 @@ export function InvoiceForm({ mode, invoiceId, initialValues }: InvoiceFormProps
             </div>
             <Button
               type="submit"
+              variant="primary"
               disabled={isPending}
-              className="w-full bg-slate-900 text-white hover:bg-slate-800"
+              className="w-full"
             >
               {isPending ? "Saving..." : mode === "create" ? "Save Invoice" : "Update Invoice"}
             </Button>

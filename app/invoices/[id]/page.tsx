@@ -57,7 +57,7 @@ export default async function InvoiceDetailPage({
               <PrintButton />
               <ButtonLink
                 href={`/invoices/${invoice.id}/edit` as Route}
-                className="bg-slate-900 text-white hover:bg-slate-800"
+                variant="primary"
               >
                 Edit Invoice
               </ButtonLink>

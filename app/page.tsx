@@ -20,7 +20,7 @@ export default async function DashboardPage() {
               Create, manage, and print invoices from one simple dashboard.
             </p>
           </div>
-          <ButtonLink href="/invoices/new" className="bg-slate-900 text-white hover:bg-slate-800">
+          <ButtonLink href="/invoices/new" variant="primary">
             Create Invoice
           </ButtonLink>
         </div>
