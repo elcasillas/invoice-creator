@@ -5,6 +5,7 @@ A minimal invoice creator built with Next.js 15, App Router, TypeScript, Tailwin
 ## Features
 
 - Dashboard for saved invoices
+- Company profile management with reusable sender details
 - Create, edit, view, print, and delete invoices
 - Dynamic line items with automatic subtotal, tax, and total calculation
 - Supabase-backed persistence using server actions
@@ -49,6 +50,8 @@ Or run the SQL in [supabase/migrations/20260501131500_create_invoices.sql](/mnt/
 If you already created the tables and hit a Row Level Security error such as `new row violates row-level security policy for table "invoices"`, run the follow-up policy migration too:
 
 - [supabase/migrations/20260501190000_enable_invoice_rls.sql](/mnt/c/Users/edcas/My%20Drive/AI/InvoiceCreator/supabase/migrations/20260501190000_enable_invoice_rls.sql:1)
+- [supabase/migrations/20260501203000_add_companies.sql](/mnt/c/Users/edcas/My%20Drive/AI/InvoiceCreator/supabase/migrations/20260501203000_add_companies.sql:1)
+- [supabase/migrations/20260501203500_enable_company_rls.sql](/mnt/c/Users/edcas/My%20Drive/AI/InvoiceCreator/supabase/migrations/20260501203500_enable_company_rls.sql:1)
 
 4. Start local development:
 
@@ -73,16 +76,17 @@ If the environment variables are not set yet, the dashboard still loads and show
 
 The app uses two tables:
 
+- `companies`
 - `invoices`
 - `invoice_items`
 
-Edits replace the associated line items for an invoice after updating the parent invoice. Deleting an invoice also deletes its line items through `on delete cascade`.
+Invoices reference a saved company profile through `company_id`. Edits replace the associated line items for an invoice after updating the parent invoice. Deleting an invoice also deletes its line items through `on delete cascade`.
 
 ## Auth Readiness
 
 Supabase Auth is optional in this version. The app is structured with dedicated Supabase utilities in `lib/supabase` so authenticated server and browser clients can be introduced later without reshaping the page and form layers.
 
-Because this version allows invoice creation without sign-in, the included RLS policies currently allow `anon` and `authenticated` access to the invoice tables. Once auth is added, these policies should be tightened to user-scoped rules.
+Because this version allows invoice creation and company management without sign-in, the included RLS policies currently allow `anon` and `authenticated` access to the `companies`, `invoices`, and `invoice_items` tables. Once auth is added, these policies should be tightened to user-scoped rules.
 
 ## Local Development Command
 

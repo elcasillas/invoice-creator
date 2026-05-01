@@ -32,6 +32,7 @@ function normalizePayload(values: InvoiceFormValues) {
 
   return {
     invoice: {
+      company_id: parsed.companyId,
       invoice_number: parsed.invoiceNumber,
       invoice_date: parsed.invoiceDate,
       due_date: parsed.dueDate || null,
@@ -61,6 +62,25 @@ export async function createInvoiceAction(values: InvoiceFormValues): Promise<In
   try {
     const supabase = createServerSupabaseClient();
     const payload = normalizePayload(values);
+    const { data: company, error: companyError } = await supabase
+      .from("companies")
+      .select("*")
+      .eq("id", payload.invoice.company_id)
+      .single();
+
+    if (companyError) {
+      return { success: false, message: companyError.message };
+    }
+
+    payload.invoice.company_name = company.name;
+    payload.invoice.company_email = company.email;
+    payload.invoice.company_address = [
+      company.address,
+      [company.city, company.state, company.postal_code].filter(Boolean).join(", "),
+      company.country
+    ]
+      .filter(Boolean)
+      .join("\n");
 
     const { data: invoice, error: invoiceError } = await supabase
       .from("invoices")
@@ -103,6 +123,25 @@ export async function updateInvoiceAction(
   try {
     const supabase = createServerSupabaseClient();
     const payload = normalizePayload(values);
+    const { data: company, error: companyError } = await supabase
+      .from("companies")
+      .select("*")
+      .eq("id", payload.invoice.company_id)
+      .single();
+
+    if (companyError) {
+      return { success: false, message: companyError.message };
+    }
+
+    payload.invoice.company_name = company.name;
+    payload.invoice.company_email = company.email;
+    payload.invoice.company_address = [
+      company.address,
+      [company.city, company.state, company.postal_code].filter(Boolean).join(", "),
+      company.country
+    ]
+      .filter(Boolean)
+      .join("\n");
 
     const { error: invoiceError } = await supabase.from("invoices").update(payload.invoice).eq("id", id);
 

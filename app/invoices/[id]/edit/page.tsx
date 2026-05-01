@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import { notFound } from "next/navigation";
 import { InvoiceForm } from "@/components/invoices/invoice-form";
-import { getInvoiceById } from "@/lib/supabase/queries";
+import { getCompanies, getInvoiceById } from "@/lib/supabase/queries";
 import { mapInvoiceToFormValues } from "@/lib/utils/invoice-mappers";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +16,7 @@ export default async function EditInvoicePage({
 
   try {
     const invoice = await getInvoiceById(id);
+    const companies = await getCompanies();
 
     return (
       <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
@@ -29,7 +30,12 @@ export default async function EditInvoicePage({
               Update the invoice and replace its line items in Supabase.
             </p>
           </div>
-          <InvoiceForm mode="edit" invoiceId={id} initialValues={mapInvoiceToFormValues(invoice)} />
+          <InvoiceForm
+            mode="edit"
+            invoiceId={id}
+            initialValues={mapInvoiceToFormValues(invoice)}
+            companies={companies}
+          />
         </div>
       </main>
     );

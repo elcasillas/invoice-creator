@@ -1,3 +1,5 @@
+import { CompanyRow } from "@/types/company";
+
 export interface InvoiceDocumentItem {
   id: string;
   description: string;
@@ -7,6 +9,7 @@ export interface InvoiceDocumentItem {
 }
 
 export interface InvoiceDocumentData {
+  company: CompanyRow | null;
   invoiceNumber: string;
   invoiceDate: string;
   dueDate: string | null;

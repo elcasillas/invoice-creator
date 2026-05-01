@@ -1,6 +1,11 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
+import { CompanyRow } from "@/types/company";
 import { InvoiceItemRow, InvoiceWithItems, type InvoiceRow } from "@/types/invoice";
+
+function normalizeCompany(row: Record<string, unknown>) {
+  return row as CompanyRow;
+}
 
 function normalizeInvoice(row: Record<string, unknown>) {
   return {
@@ -29,7 +34,7 @@ export async function getInvoices() {
   const supabase = createServerSupabaseClient();
   const { data, error } = await supabase
     .from("invoices")
-    .select("*")
+    .select("*, company:companies(*)")
     .order("invoice_date", { ascending: false })
     .order("created_at", { ascending: false });
 
@@ -48,7 +53,7 @@ export async function getInvoiceById(id: string) {
   const supabase = createServerSupabaseClient();
   const { data, error } = await supabase
     .from("invoices")
-    .select("*, invoice_items(*)")
+    .select("*, invoice_items(*), company:companies(*)")
     .eq("id", id)
     .single();
 
@@ -58,8 +63,39 @@ export async function getInvoiceById(id: string) {
 
   return {
     ...normalizeInvoice(data as Record<string, unknown>),
+    company: data.company ? normalizeCompany(data.company as Record<string, unknown>) : null,
     invoice_items: ((data.invoice_items as Record<string, unknown>[] | null) ?? []).map((item) =>
       normalizeInvoiceItem(item)
     )
   } as InvoiceWithItems;
+}
+
+export async function getCompanies() {
+  if (!hasSupabaseEnv()) {
+    return [];
+  }
+
+  const supabase = createServerSupabaseClient();
+  const { data, error } = await supabase.from("companies").select("*").order("name");
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return ((data ?? []) as Record<string, unknown>[]).map((row) => normalizeCompany(row));
+}
+
+export async function getCompanyById(id: string) {
+  if (!hasSupabaseEnv()) {
+    throw new Error("Supabase environment variables are not configured.");
+  }
+
+  const supabase = createServerSupabaseClient();
+  const { data, error } = await supabase.from("companies").select("*").eq("id", id).single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return normalizeCompany(data as Record<string, unknown>);
 }

@@ -63,6 +63,16 @@ export function InvoiceDocument({
         />
       </div>
 
+      {invoice.company?.logo_url ? (
+        <div className="border-b border-slate-200 py-6">
+          <img
+            src={invoice.company.logo_url}
+            alt={`${invoice.company.name} logo`}
+            className="max-h-16 w-auto object-contain"
+          />
+        </div>
+      ) : null}
+
       <div className="overflow-x-auto border-b border-slate-200 py-8">
         <table className="min-w-full text-left text-sm">
           <thead>
@@ -94,6 +104,15 @@ export function InvoiceDocument({
           <p className="mt-3 whitespace-pre-line text-sm text-slate-700">
             {invoice.notes || "No notes added."}
           </p>
+          {invoice.company?.tax_id ? (
+            <p className="mt-4 text-sm text-slate-700">Tax ID / VAT: {invoice.company.tax_id}</p>
+          ) : null}
+          {invoice.company?.phone ? (
+            <p className="mt-2 text-sm text-slate-700">Phone: {invoice.company.phone}</p>
+          ) : null}
+          {invoice.company?.website ? (
+            <p className="mt-2 text-sm text-slate-700">Website: {invoice.company.website}</p>
+          ) : null}
         </div>
 
         <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-5">

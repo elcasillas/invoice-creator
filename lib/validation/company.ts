@@ -1,0 +1,31 @@
+import { z } from "zod";
+
+export const companySchema = z.object({
+  name: z.string().trim().min(1, "Company name is required"),
+  address: z.string().trim().optional().or(z.literal("")),
+  city: z.string().trim().optional().or(z.literal("")),
+  state: z.string().trim().optional().or(z.literal("")),
+  postalCode: z.string().trim().optional().or(z.literal("")),
+  country: z.string().trim().optional().or(z.literal("")),
+  email: z.string().trim().email("Enter a valid email").optional().or(z.literal("")),
+  phone: z.string().trim().optional().or(z.literal("")),
+  website: z.string().trim().url("Enter a valid URL").optional().or(z.literal("")),
+  taxId: z.string().trim().optional().or(z.literal("")),
+  logoUrl: z.string().trim().url("Enter a valid URL").optional().or(z.literal(""))
+});
+
+export type CompanyFormValues = z.infer<typeof companySchema>;
+
+export const companyDefaults: CompanyFormValues = {
+  name: "",
+  address: "",
+  city: "",
+  state: "",
+  postalCode: "",
+  country: "",
+  email: "",
+  phone: "",
+  website: "",
+  taxId: "",
+  logoUrl: ""
+};

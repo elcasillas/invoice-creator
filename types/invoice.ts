@@ -1,7 +1,10 @@
+import { CompanyRow } from "@/types/company";
+
 export type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue";
 
 export interface InvoiceRow {
   id: string;
+  company_id: string | null;
   invoice_number: string;
   invoice_date: string;
   due_date: string | null;
@@ -32,5 +35,6 @@ export interface InvoiceItemRow {
 }
 
 export interface InvoiceWithItems extends InvoiceRow {
+  company: CompanyRow | null;
   invoice_items: InvoiceItemRow[];
 }

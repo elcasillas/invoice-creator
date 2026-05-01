@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
+import { CompanyRow } from "@/types/company";
 import { createInvoiceAction, updateInvoiceAction } from "@/app/actions/invoice-actions";
 import { DownloadPdfButton } from "@/components/invoices/download-pdf-button";
 import { InvoiceDocument } from "@/components/invoices/invoice-document";
@@ -26,9 +28,10 @@ interface InvoiceFormProps {
   mode: "create" | "edit";
   invoiceId?: string;
   initialValues?: InvoiceFormValues;
+  companies: CompanyRow[];
 }
 
-export function InvoiceForm({ mode, invoiceId, initialValues }: InvoiceFormProps) {
+export function InvoiceForm({ mode, invoiceId, initialValues, companies }: InvoiceFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -51,6 +54,14 @@ export function InvoiceForm({ mode, invoiceId, initialValues }: InvoiceFormProps
     control: form.control,
     name: "taxRate"
   });
+  const watchedCompanyId = useWatch({
+    control: form.control,
+    name: "companyId"
+  });
+  const selectedCompany = useMemo(
+    () => companies.find((company) => company.id === watchedCompanyId) ?? null,
+    [companies, watchedCompanyId]
+  );
 
   const totals = useMemo(
     () =>
@@ -78,8 +89,8 @@ export function InvoiceForm({ mode, invoiceId, initialValues }: InvoiceFormProps
             unitPrice: item?.unitPrice ?? invoiceDefaults.items[0].unitPrice,
             lineTotal: item?.lineTotal ?? invoiceDefaults.items[0].lineTotal
           })) ?? invoiceDefaults.items
-      }),
-    [watchedValues]
+      }, selectedCompany),
+    [selectedCompany, watchedValues]
   );
 
   useEffect(() => {
@@ -133,7 +144,7 @@ export function InvoiceForm({ mode, invoiceId, initialValues }: InvoiceFormProps
             <Button
               type="submit"
               variant="primary"
-              disabled={isPending}
+              disabled={isPending || companies.length === 0}
               className="sm:min-w-40"
             >
               {isPending ? "Saving..." : mode === "create" ? "Save Invoice" : "Update Invoice"}
@@ -147,7 +158,25 @@ export function InvoiceForm({ mode, invoiceId, initialValues }: InvoiceFormProps
       </Card>
 
       <Card className="p-6">
+        {companies.length === 0 ? (
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            Create a company first before saving invoices.{" "}
+            <Link href="/companies/new" className="font-medium underline">
+              Add company
+            </Link>
+          </div>
+        ) : null}
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <FormField label="Invoice From Company" error={form.formState.errors.companyId?.message}>
+            <Select {...form.register("companyId")}>
+              <option value="">Select a company</option>
+              {companies.map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.name}
+                </option>
+              ))}
+            </Select>
+          </FormField>
           <FormField label="Invoice Number" error={form.formState.errors.invoiceNumber?.message}>
             <Input {...form.register("invoiceNumber")} placeholder="INV-1001" />
           </FormField>
@@ -185,17 +214,38 @@ export function InvoiceForm({ mode, invoiceId, initialValues }: InvoiceFormProps
         </Card>
 
         <Card className="p-6">
-          <h2 className="text-lg font-semibold text-slate-950">Company</h2>
-          <div className="mt-4 space-y-4">
-            <FormField label="Company Name" error={form.formState.errors.companyName?.message}>
-              <Input {...form.register("companyName")} placeholder="My Company LLC" />
-            </FormField>
-            <FormField label="Company Email" error={form.formState.errors.companyEmail?.message}>
-              <Input {...form.register("companyEmail")} type="email" placeholder="hello@company.com" />
-            </FormField>
-            <FormField label="Company Address" error={form.formState.errors.companyAddress?.message}>
-              <Textarea {...form.register("companyAddress")} placeholder="456 Market Street" />
-            </FormField>
+          <h2 className="text-lg font-semibold text-slate-950">Selected Company</h2>
+          <div className="mt-4 space-y-3 text-sm text-slate-700">
+            {selectedCompany ? (
+              <>
+                <p className="font-medium text-slate-950">{selectedCompany.name}</p>
+                {selectedCompany.email ? <p>{selectedCompany.email}</p> : null}
+                {selectedCompany.phone ? <p>{selectedCompany.phone}</p> : null}
+                {[selectedCompany.address, selectedCompany.city, selectedCompany.state, selectedCompany.postal_code, selectedCompany.country]
+                  .filter(Boolean)
+                  .length ? (
+                  <div className="space-y-1 whitespace-pre-line">
+                    {selectedCompany.address ? <p>{selectedCompany.address}</p> : null}
+                    {[selectedCompany.city, selectedCompany.state, selectedCompany.postal_code]
+                      .filter(Boolean)
+                      .length ? (
+                      <p>{[selectedCompany.city, selectedCompany.state, selectedCompany.postal_code].filter(Boolean).join(", ")}</p>
+                    ) : null}
+                    {selectedCompany.country ? <p>{selectedCompany.country}</p> : null}
+                  </div>
+                ) : null}
+                {selectedCompany.tax_id ? <p>Tax ID / VAT: {selectedCompany.tax_id}</p> : null}
+                {selectedCompany.logo_url ? (
+                  <img
+                    src={selectedCompany.logo_url}
+                    alt={`${selectedCompany.name} logo`}
+                    className="max-h-16 w-auto rounded-lg border border-slate-200 object-contain p-2"
+                  />
+                ) : null}
+              </>
+            ) : (
+              <p className="text-slate-500">Select a company to populate the invoice header.</p>
+            )}
           </div>
         </Card>
       </div>
@@ -324,7 +374,7 @@ export function InvoiceForm({ mode, invoiceId, initialValues }: InvoiceFormProps
             <Button
               type="submit"
               variant="primary"
-              disabled={isPending}
+              disabled={isPending || companies.length === 0}
               className="w-full"
             >
               {isPending ? "Saving..." : mode === "create" ? "Save Invoice" : "Update Invoice"}

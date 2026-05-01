@@ -1,10 +1,12 @@
 import { InvoiceFormValues } from "@/lib/validation/invoice";
 import { calculateInvoiceTotals, calculateLineTotal } from "@/lib/utils/invoice";
+import { CompanyRow } from "@/types/company";
 import { InvoiceWithItems } from "@/types/invoice";
 import { InvoiceDocumentData } from "@/types/invoice-document";
 
 export function mapInvoiceToDocument(invoice: InvoiceWithItems): InvoiceDocumentData {
   return {
+    company: invoice.company,
     invoiceNumber: invoice.invoice_number,
     invoiceDate: invoice.invoice_date,
     dueDate: invoice.due_date,
@@ -12,9 +14,18 @@ export function mapInvoiceToDocument(invoice: InvoiceWithItems): InvoiceDocument
     clientName: invoice.client_name,
     clientEmail: invoice.client_email,
     clientAddress: invoice.client_address,
-    companyName: invoice.company_name,
-    companyEmail: invoice.company_email,
-    companyAddress: invoice.company_address,
+    companyName: invoice.company?.name ?? invoice.company_name,
+    companyEmail: invoice.company?.email ?? invoice.company_email,
+    companyAddress:
+      invoice.company
+        ? [
+            invoice.company.address,
+            [invoice.company.city, invoice.company.state, invoice.company.postal_code].filter(Boolean).join(", "),
+            invoice.company.country
+          ]
+            .filter(Boolean)
+            .join("\n")
+        : invoice.company_address,
     notes: invoice.notes,
     subtotal: invoice.subtotal,
     taxRate: invoice.tax_rate,
@@ -30,10 +41,23 @@ export function mapInvoiceToDocument(invoice: InvoiceWithItems): InvoiceDocument
   };
 }
 
-export function mapFormValuesToDocument(values: InvoiceFormValues): InvoiceDocumentData {
+export function mapFormValuesToDocument(
+  values: InvoiceFormValues,
+  selectedCompany?: CompanyRow | null
+): InvoiceDocumentData {
   const totals = calculateInvoiceTotals(values);
+  const derivedCompanyAddress = selectedCompany
+    ? [
+        selectedCompany.address,
+        [selectedCompany.city, selectedCompany.state, selectedCompany.postal_code].filter(Boolean).join(", "),
+        selectedCompany.country
+      ]
+        .filter(Boolean)
+        .join("\n")
+    : null;
 
   return {
+    company: selectedCompany ?? null,
     invoiceNumber: values.invoiceNumber || "DRAFT",
     invoiceDate: values.invoiceDate,
     dueDate: values.dueDate || null,
@@ -41,9 +65,9 @@ export function mapFormValuesToDocument(values: InvoiceFormValues): InvoiceDocum
     clientName: values.clientName || "Client name",
     clientEmail: values.clientEmail || null,
     clientAddress: values.clientAddress || null,
-    companyName: values.companyName || null,
-    companyEmail: values.companyEmail || null,
-    companyAddress: values.companyAddress || null,
+    companyName: selectedCompany?.name ?? values.companyName ?? null,
+    companyEmail: selectedCompany?.email ?? values.companyEmail ?? null,
+    companyAddress: derivedCompanyAddress ?? values.companyAddress ?? null,
     notes: values.notes || null,
     subtotal: totals.subtotal,
     taxRate: values.taxRate,
