@@ -46,6 +46,10 @@ supabase db push
 
 Or run the SQL in [supabase/migrations/20260501131500_create_invoices.sql](/mnt/c/Users/edcas/My%20Drive/AI/InvoiceCreator/supabase/migrations/20260501131500_create_invoices.sql:1) from the Supabase SQL editor.
 
+If you already created the tables and hit a Row Level Security error such as `new row violates row-level security policy for table "invoices"`, run the follow-up policy migration too:
+
+- [supabase/migrations/20260501190000_enable_invoice_rls.sql](/mnt/c/Users/edcas/My%20Drive/AI/InvoiceCreator/supabase/migrations/20260501190000_enable_invoice_rls.sql:1)
+
 4. Start local development:
 
 ```bash
@@ -77,6 +81,8 @@ Edits replace the associated line items for an invoice after updating the parent
 ## Auth Readiness
 
 Supabase Auth is optional in this version. The app is structured with dedicated Supabase utilities in `lib/supabase` so authenticated server and browser clients can be introduced later without reshaping the page and form layers.
+
+Because this version allows invoice creation without sign-in, the included RLS policies currently allow `anon` and `authenticated` access to the invoice tables. Once auth is added, these policies should be tightened to user-scoped rules.
 
 ## Local Development Command
 
