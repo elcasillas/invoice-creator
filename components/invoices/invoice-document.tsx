@@ -3,12 +3,16 @@ import { formatCurrency, formatDate } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
 import { InvoiceDocumentData } from "@/types/invoice-document";
 
+function DetailLabel({ children }: { children: React.ReactNode }) {
+  return <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">{children}</p>;
+}
+
 function AddressBlock({ title, lines }: { title: string; lines: Array<string | null> }) {
   const filteredLines = lines.filter(Boolean);
 
   return (
     <div>
-      <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</h2>
+      <DetailLabel>{title}</DetailLabel>
       {filteredLines.length ? (
         <div className="mt-3 space-y-1 text-sm text-slate-700">
           {filteredLines.map((line) => (
@@ -38,40 +42,77 @@ export function InvoiceDocument({
       id={id}
       className={cn("rounded-3xl bg-white p-8 print:rounded-none print:border-0 print:shadow-none", className)}
     >
-      <div className="flex flex-col gap-6 border-b border-slate-200 pb-8 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-400">Invoice</p>
-          <h2 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">
-            {invoice.invoiceNumber}
-          </h2>
-        </div>
-        <div className="space-y-3 text-sm text-slate-600">
-          {!hideStatus ? <p>Status: {invoice.status}</p> : null}
-          <p>Invoice Date: {formatDate(invoice.invoiceDate)}</p>
-          <p>Due Date: {formatDate(invoice.dueDate)}</p>
-        </div>
-      </div>
+      <div className="border-b border-slate-200 pb-8">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
+          <div className="space-y-2">
+            <p className="text-3xl font-semibold tracking-tight text-slate-950">
+              {invoice.companyName || "Your Company"}
+            </p>
+            <div className="space-y-1 text-sm text-slate-700">
+              {invoice.companyAddress ? (
+                <p className="whitespace-pre-line">{invoice.companyAddress}</p>
+              ) : (
+                <p>No company address added.</p>
+              )}
+              {invoice.companyEmail ? <p>{invoice.companyEmail}</p> : null}
+              {invoice.company?.phone ? <p>{invoice.company.phone}</p> : null}
+              {invoice.company?.website ? <p>{invoice.company.website}</p> : null}
+            </div>
+          </div>
 
-      <div className="grid gap-8 border-b border-slate-200 py-8 sm:grid-cols-2">
-        <AddressBlock
-          title="Billed To"
-          lines={[invoice.clientName, invoice.clientEmail, invoice.clientAddress]}
-        />
-        <AddressBlock
-          title="From"
-          lines={[invoice.companyName, invoice.companyEmail, invoice.companyAddress]}
-        />
-      </div>
+          <div className="flex items-start justify-start lg:justify-end">
+            <div className="flex h-28 w-full max-w-[280px] items-center justify-center rounded-2xl border border-amber-200 bg-amber-50/40 p-4">
+              {invoice.company?.logo_url ? (
+                <img
+                  src={invoice.company.logo_url}
+                  alt={`${invoice.company.name} logo`}
+                  className="max-h-20 w-auto object-contain"
+                />
+              ) : (
+                <div className="text-center text-amber-700">
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em]">Company Logo</p>
+                  <p className="mt-2 text-sm">No logo uploaded</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
 
-      {invoice.company?.logo_url ? (
-        <div className="border-b border-slate-200 py-6">
-          <img
-            src={invoice.company.logo_url}
-            alt={`${invoice.company.name} logo`}
-            className="max-h-16 w-auto object-contain"
+        <div className="mt-14 grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
+          <AddressBlock
+            title="Bill To"
+            lines={[invoice.clientName, invoice.clientEmail, invoice.clientAddress]}
           />
+
+          <div className="space-y-6 lg:text-right">
+            <div>
+              <p className="text-5xl font-semibold uppercase tracking-[0.18em] text-amber-700 lg:justify-self-end">
+                Invoice
+              </p>
+            </div>
+            <div className="space-y-3 text-sm text-slate-700">
+              <div className="grid grid-cols-[120px_minmax(0,1fr)] gap-4 lg:grid-cols-[120px_120px] lg:justify-end">
+                <p className="font-semibold text-amber-700">Invoice #</p>
+                <p className="text-slate-950 lg:text-right">{invoice.invoiceNumber}</p>
+              </div>
+              <div className="grid grid-cols-[120px_minmax(0,1fr)] gap-4 lg:grid-cols-[120px_120px] lg:justify-end">
+                <p className="font-semibold text-amber-700">Invoice date</p>
+                <p className="text-slate-950 lg:text-right">{formatDate(invoice.invoiceDate)}</p>
+              </div>
+              <div className="grid grid-cols-[120px_minmax(0,1fr)] gap-4 lg:grid-cols-[120px_120px] lg:justify-end">
+                <p className="font-semibold text-amber-700">Due date</p>
+                <p className="text-slate-950 lg:text-right">{formatDate(invoice.dueDate)}</p>
+              </div>
+              {!hideStatus ? (
+                <div className="grid grid-cols-[120px_minmax(0,1fr)] gap-4 lg:grid-cols-[120px_120px] lg:justify-end">
+                  <p className="font-semibold text-amber-700">Status</p>
+                  <p className="text-slate-950 lg:text-right">{invoice.status}</p>
+                </div>
+              ) : null}
+            </div>
+          </div>
         </div>
-      ) : null}
+      </div>
 
       <div className="overflow-x-auto border-b border-slate-200 py-8">
         <table className="min-w-full text-left text-sm">
