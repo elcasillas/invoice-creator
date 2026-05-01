@@ -6,12 +6,15 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
 import { createInvoiceAction, updateInvoiceAction } from "@/app/actions/invoice-actions";
+import { DownloadPdfButton } from "@/components/invoices/download-pdf-button";
+import { InvoiceDocument } from "@/components/invoices/invoice-document";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { mapFormValuesToDocument } from "@/lib/utils/invoice-document";
 import { calculateInvoiceTotals, calculateLineTotal } from "@/lib/utils/invoice";
 import {
   invoiceDefaults,
@@ -62,6 +65,16 @@ export function InvoiceForm({ mode, invoiceId, initialValues }: InvoiceFormProps
       }),
     [watchedItems, watchedTaxRate]
   );
+  const watchedValues = useWatch({ control: form.control });
+  const previewInvoice = useMemo(
+    () =>
+      mapFormValuesToDocument({
+        ...invoiceDefaults,
+        ...watchedValues,
+        items: watchedValues.items ?? invoiceDefaults.items
+      }),
+    [watchedValues]
+  );
 
   useEffect(() => {
     form.setValue("subtotal", totals.subtotal);
@@ -106,13 +119,19 @@ export function InvoiceForm({ mode, invoiceId, initialValues }: InvoiceFormProps
               Required fields are validated before anything is written to Supabase.
             </p>
           </div>
-          <Button
-            type="submit"
-            disabled={isPending}
-            className="bg-slate-900 text-white hover:bg-slate-800 sm:min-w-40"
-          >
-            {isPending ? "Saving..." : mode === "create" ? "Save Invoice" : "Update Invoice"}
-          </Button>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <DownloadPdfButton
+              targetId="invoice-form-pdf"
+              invoiceNumber={previewInvoice.invoiceNumber}
+            />
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="bg-slate-900 text-white hover:bg-slate-800 sm:min-w-40"
+            >
+              {isPending ? "Saving..." : mode === "create" ? "Save Invoice" : "Update Invoice"}
+            </Button>
+          </div>
         </div>
         {submitSuccess ? (
           <p className="mt-3 text-sm text-emerald-700">{submitSuccess}</p>
@@ -304,6 +323,20 @@ export function InvoiceForm({ mode, invoiceId, initialValues }: InvoiceFormProps
             </Button>
           </div>
         </Card>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold text-slate-950">Invoice Preview</h2>
+          <p className="text-sm text-slate-500">
+            This preview is used for the downloadable PDF.
+          </p>
+        </div>
+        <InvoiceDocument
+          invoice={previewInvoice}
+          id="invoice-form-pdf"
+          className="border-slate-200"
+        />
       </div>
     </form>
   );
