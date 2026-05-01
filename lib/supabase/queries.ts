@@ -4,7 +4,22 @@ import { CompanyRow } from "@/types/company";
 import { InvoiceItemRow, InvoiceWithItems, type InvoiceRow } from "@/types/invoice";
 
 function normalizeCompany(row: Record<string, unknown>) {
-  return row as CompanyRow;
+  return {
+    id: String(row.id ?? ""),
+    name: String(row.name ?? ""),
+    address: (row.address as string | null | undefined) ?? null,
+    city: (row.city as string | null | undefined) ?? null,
+    state: (row.state as string | null | undefined) ?? null,
+    postal_code: (row.postal_code as string | null | undefined) ?? null,
+    country: (row.country as string | null | undefined) ?? null,
+    email: (row.email as string | null | undefined) ?? null,
+    phone: (row.phone as string | null | undefined) ?? null,
+    website: (row.website as string | null | undefined) ?? null,
+    tax_id: (row.tax_id as string | null | undefined) ?? null,
+    logo_url: (row.logo_url as string | null | undefined) ?? null,
+    created_at: String(row.created_at ?? ""),
+    updated_at: String(row.updated_at ?? "")
+  } satisfies CompanyRow;
 }
 
 function normalizeInvoice(row: Record<string, unknown>) {
