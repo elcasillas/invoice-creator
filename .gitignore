@@ -5,3 +5,4 @@ build.exit
 tsconfig.tsbuildinfo
 .codex
 .env.local
+.vercel
