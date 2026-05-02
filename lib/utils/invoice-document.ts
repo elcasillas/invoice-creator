@@ -76,7 +76,7 @@ export function mapFormValuesToDocument(
     invoiceDate: values.invoiceDate,
     dueDate: values.dueDate || null,
     status: values.status,
-    clientName: selectedClient?.name ?? values.clientName || "Client name",
+    clientName: (selectedClient?.name ?? values.clientName) || "Client name",
     clientEmail: selectedClient?.email ?? values.clientEmail ?? null,
     clientPhone: selectedClient?.phone ?? null,
     clientAddress:
