@@ -3,7 +3,6 @@ import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { getInvoices } from "@/lib/supabase/queries";
-import { formatCurrency } from "@/lib/utils/format";
 import { type InvoiceRow } from "@/types/invoice";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +17,6 @@ function groupInvoicesByCompany(invoices: InvoiceRow[]) {
       key: string;
       companyName: string;
       invoices: InvoiceRow[];
-      totalAmount: number;
     }
   >();
 
@@ -35,15 +33,13 @@ function groupInvoicesByCompany(invoices: InvoiceRow[]) {
 
     if (existingGroup) {
       existingGroup.invoices.push(invoice);
-      existingGroup.totalAmount += invoice.total;
       continue;
     }
 
     groups.set(companyId, {
       key: companyId,
       companyName,
-      invoices: [invoice],
-      totalAmount: invoice.total
+      invoices: [invoice]
     });
   }
 
@@ -83,19 +79,11 @@ export default async function DashboardPage() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {invoiceGroups.map((group, index) => (
+            {invoiceGroups.map((group) => (
               <Card key={group.key} className="overflow-hidden">
-                <details open={index === 0} className="group">
+                <details className="group">
                   <summary className="flex cursor-pointer list-none flex-col gap-3 border-b border-slate-200 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="space-y-1">
-                      <h2 className="text-lg font-semibold text-slate-950">{group.companyName}</h2>
-                      <div className="flex flex-wrap gap-3 text-sm text-slate-500">
-                        <span>
-                          {group.invoices.length} invoice{group.invoices.length === 1 ? "" : "s"}
-                        </span>
-                        <span>Total: {formatCurrency(group.totalAmount)}</span>
-                      </div>
-                    </div>
+                    <h2 className="text-lg font-semibold text-slate-950">{group.companyName}</h2>
                     <div className="inline-flex items-center gap-2 text-sm font-medium text-slate-700">
                       <span className="group-open:hidden">Expand</span>
                       <span className="hidden group-open:inline">Collapse</span>
