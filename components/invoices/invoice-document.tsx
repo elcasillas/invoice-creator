@@ -38,6 +38,7 @@ export function InvoiceDocument({
   className?: string;
   hideStatus?: boolean;
 }) {
+  const companyName = invoice.company?.name ?? invoice.companyName ?? "Company";
   const companyLogoSrc = getCompanyLogoSrc(invoice.company?.logo_url);
 
   return (
@@ -68,7 +69,7 @@ export function InvoiceDocument({
               {companyLogoSrc ? (
                 <img
                   src={companyLogoSrc}
-                  alt={`${invoice.company.name} logo`}
+                  alt={`${companyName} logo`}
                   className="max-h-20 w-auto object-contain"
                 />
               ) : (
