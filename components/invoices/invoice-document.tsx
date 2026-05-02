@@ -66,6 +66,8 @@ export function InvoiceDocument({
                 <img
                   src={invoice.company.logo_url}
                   alt={`${invoice.company.name} logo`}
+                  crossOrigin="anonymous"
+                  referrerPolicy="no-referrer"
                   className="max-h-20 w-auto object-contain"
                 />
               ) : (
