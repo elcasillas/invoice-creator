@@ -52,6 +52,7 @@ export default async function InvoiceDetailPage({
               <DownloadPdfButton
                 targetId="invoice-detail-pdf"
                 invoiceNumber={invoice.invoice_number}
+                companyName={invoice.company?.name ?? invoice.company_name}
               />
               <ButtonLink
                 href={`/invoices/${invoice.id}/edit` as Route}

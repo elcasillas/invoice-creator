@@ -71,14 +71,32 @@ async function normalizeImageForPdf(imageUrl: string) {
 export function DownloadPdfButton({
   targetId,
   invoiceNumber,
+  companyName,
   className
 }: {
   targetId: string;
   invoiceNumber: string;
+  companyName?: string | null;
   className?: string;
 }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  function buildPdfFilename() {
+    const normalizedCompanyName = (companyName ?? "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+
+    if (normalizedCompanyName) {
+      return `${normalizedCompanyName}-invoice-${invoiceNumber || "draft"}.pdf`;
+    }
+
+    return `invoice-${invoiceNumber || "draft"}.pdf`;
+  }
 
   const handleDownload = async () => {
     setIsGenerating(true);
@@ -152,7 +170,7 @@ export function DownloadPdfButton({
         remainingHeight -= pageHeight;
       }
 
-      pdf.save(`invoice-${invoiceNumber || "draft"}.pdf`);
+      pdf.save(buildPdfFilename());
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Failed to generate PDF.");
     } finally {

@@ -47,7 +47,7 @@ export function InvoiceDocument({
       className={cn("rounded-3xl bg-white p-8 print:rounded-none print:border-0 print:shadow-none", className)}
     >
       <div className="border-b border-slate-200 pb-8">
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-2">
             <p className="text-3xl font-semibold tracking-tight text-slate-950">
               {invoice.companyName || "Your Company"}
@@ -65,12 +65,12 @@ export function InvoiceDocument({
           </div>
 
           <div className="flex items-start justify-start lg:justify-end">
-            <div className="flex h-28 w-full max-w-[280px] items-center justify-center p-4">
+            <div className="flex min-h-36 w-full max-w-[320px] items-center justify-center p-4">
               {companyLogoSrc ? (
                 <img
                   src={companyLogoSrc}
                   alt={`${companyName} logo`}
-                  className="max-h-20 w-auto object-contain"
+                  className="max-h-40 w-auto object-contain"
                 />
               ) : (
                 <div />
@@ -79,7 +79,7 @@ export function InvoiceDocument({
           </div>
         </div>
 
-        <div className="mt-14 grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="mt-14 grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
           <AddressBlock
             title="Bill To"
             lines={[invoice.clientName, invoice.clientEmail, invoice.clientPhone, invoice.clientAddress]}

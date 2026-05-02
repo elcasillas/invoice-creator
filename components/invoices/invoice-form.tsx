@@ -204,6 +204,7 @@ export function InvoiceForm({
             <DownloadPdfButton
               targetId="invoice-form-pdf"
               invoiceNumber={previewInvoice.invoiceNumber}
+              companyName={previewInvoice.companyName}
             />
             <Button
               type="submit"
