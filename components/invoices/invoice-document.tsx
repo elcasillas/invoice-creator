@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { getCompanyLogoSrc } from "@/lib/utils/company-logo";
 import { formatCurrency, formatDate } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
 import { InvoiceDocumentData } from "@/types/invoice-document";
@@ -37,6 +38,8 @@ export function InvoiceDocument({
   className?: string;
   hideStatus?: boolean;
 }) {
+  const companyLogoSrc = getCompanyLogoSrc(invoice.company?.logo_url);
+
   return (
     <Card
       id={id}
@@ -62,12 +65,10 @@ export function InvoiceDocument({
 
           <div className="flex items-start justify-start lg:justify-end">
             <div className="flex h-28 w-full max-w-[280px] items-center justify-center p-4">
-              {invoice.company?.logo_url ? (
+              {companyLogoSrc ? (
                 <img
-                  src={invoice.company.logo_url}
+                  src={companyLogoSrc}
                   alt={`${invoice.company.name} logo`}
-                  crossOrigin="anonymous"
-                  referrerPolicy="no-referrer"
                   className="max-h-20 w-auto object-contain"
                 />
               ) : (

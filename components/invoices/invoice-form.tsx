@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { mapFormValuesToDocument } from "@/lib/utils/invoice-document";
+import { getCompanyLogoSrc } from "@/lib/utils/company-logo";
 import { calculateInvoiceTotals, calculateLineTotal } from "@/lib/utils/invoice";
 import { getNextInvoiceNumberForCompany } from "@/lib/utils/invoice-number";
 import {
@@ -91,6 +92,10 @@ export function InvoiceForm({
       getNextInvoiceNumberForCompany(selectedCompany.invoice_start_number, [])
     );
   }, [nextInvoiceNumbers, selectedCompany]);
+  const selectedCompanyLogoSrc = useMemo(
+    () => getCompanyLogoSrc(selectedCompany?.logo_url),
+    [selectedCompany?.logo_url]
+  );
 
   const totals = useMemo(
     () =>
@@ -349,9 +354,9 @@ export function InvoiceForm({
                   </div>
                 ) : null}
                 {selectedCompany.tax_id ? <p>Tax ID / VAT: {selectedCompany.tax_id}</p> : null}
-                {selectedCompany.logo_url ? (
+                {selectedCompanyLogoSrc ? (
                   <img
-                    src={selectedCompany.logo_url}
+                    src={selectedCompanyLogoSrc}
                     alt={`${selectedCompany.name} logo`}
                     className="max-h-16 w-auto rounded-lg border border-slate-200 object-contain p-2"
                   />
