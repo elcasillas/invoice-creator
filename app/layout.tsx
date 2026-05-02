@@ -5,7 +5,12 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Invoice Creator",
-  description: "A simple invoice creator built with Next.js and Supabase."
+  description: "A simple invoice creator built with Next.js and Supabase.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg"
+  }
 };
 
 export default function RootLayout({
