@@ -28,7 +28,7 @@ function normalizeCompanyPayload(values: CompanyFormValues) {
 
 export async function createCompanyAction(values: CompanyFormValues): Promise<CompanyActionResult> {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient();
     const payload = normalizeCompanyPayload(values);
     const { data, error } = await supabase.from("companies").insert(payload).select("id").single();
 
@@ -49,7 +49,7 @@ export async function updateCompanyAction(
   values: CompanyFormValues
 ): Promise<CompanyActionResult> {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient();
     const payload = normalizeCompanyPayload(values);
     const { error } = await supabase.from("companies").update(payload).eq("id", id);
 
@@ -67,7 +67,7 @@ export async function updateCompanyAction(
 }
 
 export async function deleteCompanyAction(id: string) {
-  const supabase = createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   const { error } = await supabase.from("companies").delete().eq("id", id);
 
   if (error) {

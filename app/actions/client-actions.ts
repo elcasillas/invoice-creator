@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getAuthenticatedUser } from "@/lib/supabase/auth";
 import { clientSchema, type ClientFormValues } from "@/lib/validation/client";
 
 type ClientActionResult =
@@ -27,9 +27,21 @@ function normalizeClientPayload(values: ClientFormValues) {
 
 export async function createClientAction(values: ClientFormValues): Promise<ClientActionResult> {
   try {
-    const supabase = createServerSupabaseClient();
+    const { supabase, user } = await getAuthenticatedUser();
+
+    if (!user) {
+      return {
+        success: false,
+        message: "Client profiles require sign-in. You can still enter client details manually on invoices."
+      };
+    }
+
     const payload = normalizeClientPayload(values);
-    const { data, error } = await supabase.from("clients").insert(payload).select("id").single();
+    const { data, error } = await supabase
+      .from("clients")
+      .insert({ ...payload, user_id: user.id })
+      .select("id")
+      .single();
 
     if (error) {
       return { success: false, message: error.message };
@@ -48,7 +60,15 @@ export async function updateClientAction(
   values: ClientFormValues
 ): Promise<ClientActionResult> {
   try {
-    const supabase = createServerSupabaseClient();
+    const { supabase, user } = await getAuthenticatedUser();
+
+    if (!user) {
+      return {
+        success: false,
+        message: "Client profiles require sign-in. You can still enter client details manually on invoices."
+      };
+    }
+
     const payload = normalizeClientPayload(values);
     const { error } = await supabase.from("clients").update(payload).eq("id", id);
 
@@ -66,7 +86,12 @@ export async function updateClientAction(
 }
 
 export async function deleteClientAction(id: string) {
-  const supabase = createServerSupabaseClient();
+  const { supabase, user } = await getAuthenticatedUser();
+
+  if (!user) {
+    throw new Error("Client profiles require sign-in.");
+  }
+
   const { error } = await supabase.from("clients").delete().eq("id", id);
 
   if (error) {

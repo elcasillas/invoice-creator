@@ -206,16 +206,27 @@ export function InvoiceForm({ mode, invoiceId, initialValues, companies, clients
               ))}
             </Select>
           </FormField>
-          <FormField label="Client Profile">
-            <Select {...form.register("clientId")}>
-              <option value="">No saved client selected</option>
-              {clients.map((client) => (
-                <option key={client.id} value={client.id}>
-                  {client.name}
-                </option>
-              ))}
-            </Select>
-          </FormField>
+          <div className="space-y-2">
+            <FormField label="Client Profile">
+              <Select {...form.register("clientId")}>
+                <option value="">No saved client selected</option>
+                {clients.map((client) => (
+                  <option key={client.id} value={client.id}>
+                    {client.name}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
+            {clients.length === 0 ? (
+              <p className="text-xs text-slate-500">
+                Saved client profiles require sign-in.{" "}
+                <Link href="/login" className="font-medium underline">
+                  Log in
+                </Link>{" "}
+                or continue with manual client details below.
+              </p>
+            ) : null}
+          </div>
           <FormField label="Invoice Number" error={form.formState.errors.invoiceNumber?.message}>
             <Input {...form.register("invoiceNumber")} placeholder="INV-1001" />
           </FormField>

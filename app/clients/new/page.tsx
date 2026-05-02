@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { ClientForm } from "@/components/clients/client-form";
+import { canManageClients } from "@/lib/supabase/queries";
 
-export default function NewClientPage() {
+export default async function NewClientPage() {
+  const authEnabled = await canManageClients();
+
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl space-y-6">
@@ -12,7 +15,16 @@ export default function NewClientPage() {
           <h1 className="text-3xl font-semibold tracking-tight text-slate-950">Create Client</h1>
           <p className="text-sm text-slate-500">Save a reusable client profile.</p>
         </div>
-        <ClientForm mode="create" />
+        {!authEnabled ? (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            Client profiles require sign-in.{" "}
+            <Link href="/login" className="font-medium underline">
+              Log in
+            </Link>{" "}
+            to save reusable clients. You can still create invoices using manual client details.
+          </div>
+        ) : null}
+        <ClientForm mode="create" authEnabled={authEnabled} />
       </div>
     </main>
   );

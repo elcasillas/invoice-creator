@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ClientForm } from "@/components/clients/client-form";
-import { getClientById } from "@/lib/supabase/queries";
+import { canManageClients, getClientById } from "@/lib/supabase/queries";
 import { mapClientToFormValues } from "@/lib/utils/client-mappers";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +12,30 @@ export default async function EditClientPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const authEnabled = await canManageClients();
+
+  if (!authEnabled) {
+    return (
+      <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-5xl space-y-6">
+          <div className="space-y-2">
+            <Link href="/clients" className="text-sm text-slate-500 hover:text-slate-900">
+              Back to clients
+            </Link>
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-950">Edit Client</h1>
+            <p className="text-sm text-slate-500">Sign in to edit saved client profiles.</p>
+          </div>
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            Client profiles require sign-in.{" "}
+            <Link href="/login" className="font-medium underline">
+              Log in
+            </Link>{" "}
+            to manage your saved clients.
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   try {
     const client = await getClientById(id);
@@ -26,7 +50,12 @@ export default async function EditClientPage({
             <h1 className="text-3xl font-semibold tracking-tight text-slate-950">Edit Client</h1>
             <p className="text-sm text-slate-500">Update this saved client profile.</p>
           </div>
-          <ClientForm mode="edit" clientId={id} initialValues={mapClientToFormValues(client)} />
+          <ClientForm
+            mode="edit"
+            clientId={id}
+            initialValues={mapClientToFormValues(client)}
+            authEnabled={authEnabled}
+          />
         </div>
       </main>
     );

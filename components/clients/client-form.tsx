@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -15,11 +16,13 @@ import { clientDefaults, clientSchema, type ClientFormValues } from "@/lib/valid
 export function ClientForm({
   mode,
   clientId,
-  initialValues
+  initialValues,
+  authEnabled
 }: {
   mode: "create" | "edit";
   clientId?: string;
   initialValues?: ClientFormValues;
+  authEnabled: boolean;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -49,6 +52,15 @@ export function ClientForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
+      {!authEnabled ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          Saving client profiles requires sign-in.{" "}
+          <Link href="/login" className="font-medium underline">
+            Log in
+          </Link>{" "}
+          to continue.
+        </div>
+      ) : null}
       <Card className="p-6">
         <div className="grid gap-4 md:grid-cols-2">
           <FormField label="Client Name" error={form.formState.errors.name?.message}>
@@ -86,7 +98,7 @@ export function ClientForm({
 
       <div className="flex items-center justify-between gap-4">
         {submitError ? <p className="text-sm text-rose-600">{submitError}</p> : <div />}
-        <Button type="submit" variant="primary" disabled={isPending}>
+        <Button type="submit" variant="primary" disabled={isPending || !authEnabled}>
           {isPending ? "Saving..." : mode === "create" ? "Save Client" : "Update Client"}
         </Button>
       </div>

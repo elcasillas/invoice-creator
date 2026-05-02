@@ -61,7 +61,7 @@ function normalizePayload(values: InvoiceFormValues) {
 
 export async function createInvoiceAction(values: InvoiceFormValues): Promise<InvoiceActionResult> {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient();
     const payload = normalizePayload(values);
     const { data: company, error: companyError } = await supabase
       .from("companies")
@@ -144,7 +144,7 @@ export async function updateInvoiceAction(
   values: InvoiceFormValues
 ): Promise<InvoiceActionResult> {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient();
     const payload = normalizePayload(values);
     const { data: company, error: companyError } = await supabase
       .from("companies")
@@ -228,7 +228,7 @@ export async function updateInvoiceAction(
 }
 
 export async function deleteInvoiceAction(id: string) {
-  const supabase = createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   const { error } = await supabase.from("invoices").delete().eq("id", id);
 
   if (error) {

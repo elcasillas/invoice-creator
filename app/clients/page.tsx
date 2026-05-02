@@ -1,11 +1,13 @@
+import Link from "next/link";
 import { ClientTable } from "@/components/clients/client-table";
 import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { getClients } from "@/lib/supabase/queries";
+import { canManageClients, getClients } from "@/lib/supabase/queries";
 
 export const dynamic = "force-dynamic";
 
 export default async function ClientsPage() {
+  const authEnabled = await canManageClients();
   const clients = await getClients();
 
   return (
@@ -23,6 +25,15 @@ export default async function ClientsPage() {
           </ButtonLink>
         </div>
         <Card className="overflow-hidden">
+          {!authEnabled ? (
+            <div className="border-b border-slate-200 bg-amber-50 px-5 py-4 text-sm text-amber-900">
+              Client profiles require a signed-in Supabase user.{" "}
+              <Link href="/login" className="font-medium underline">
+                Log in
+              </Link>{" "}
+              to create and reuse saved clients. Manual client entry on invoices still works.
+            </div>
+          ) : null}
           <ClientTable clients={clients} />
         </Card>
       </div>

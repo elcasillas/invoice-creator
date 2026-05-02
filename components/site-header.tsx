@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { Route } from "next";
+import { logout } from "@/app/login/actions";
+import { getAuthenticatedUser } from "@/lib/supabase/auth";
 
 const navItems = [
   { href: "/", label: "Invoices" },
@@ -7,7 +9,9 @@ const navItems = [
   { href: "/companies", label: "Companies" }
 ] as const satisfies ReadonlyArray<{ href: Route; label: string }>;
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const { user } = await getAuthenticatedUser();
+
   return (
     <header className="border-b border-slate-200 bg-white">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
@@ -20,6 +24,17 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
+          {user ? (
+            <form action={logout}>
+              <button className="hover:text-slate-950" type="submit">
+                Log out
+              </button>
+            </form>
+          ) : (
+            <Link href="/login" className="hover:text-slate-950">
+              Log in
+            </Link>
+          )}
         </nav>
       </div>
     </header>

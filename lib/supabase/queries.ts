@@ -1,3 +1,4 @@
+import { getAuthenticatedUser } from "@/lib/supabase/auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { CompanyRow } from "@/types/company";
@@ -66,7 +67,7 @@ export async function getInvoices() {
     return [];
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   const { data, error } = await supabase
     .from("invoices")
     .select("*, company:companies(*), client:clients(*)")
@@ -85,7 +86,7 @@ export async function getInvoiceById(id: string) {
     throw new Error("Supabase environment variables are not configured.");
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   const { data, error } = await supabase
     .from("invoices")
     .select("*, invoice_items(*), company:companies(*), client:clients(*)")
@@ -111,7 +112,7 @@ export async function getCompanies() {
     return [];
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   const { data, error } = await supabase.from("companies").select("*").order("name");
 
   if (error) {
@@ -126,7 +127,7 @@ export async function getCompanyById(id: string) {
     throw new Error("Supabase environment variables are not configured.");
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   const { data, error } = await supabase.from("companies").select("*").eq("id", id).single();
 
   if (error) {
@@ -141,7 +142,12 @@ export async function getClients() {
     return [];
   }
 
-  const supabase = createServerSupabaseClient();
+  const { supabase, user } = await getAuthenticatedUser();
+
+  if (!user) {
+    return [];
+  }
+
   const { data, error } = await supabase.from("clients").select("*").order("name");
 
   if (error) {
@@ -156,7 +162,12 @@ export async function getClientById(id: string) {
     throw new Error("Supabase environment variables are not configured.");
   }
 
-  const supabase = createServerSupabaseClient();
+  const { supabase, user } = await getAuthenticatedUser();
+
+  if (!user) {
+    throw new Error("Client profiles require sign-in.");
+  }
+
   const { data, error } = await supabase.from("clients").select("*").eq("id", id).single();
 
   if (error) {
@@ -164,4 +175,13 @@ export async function getClientById(id: string) {
   }
 
   return normalizeClient(data as Record<string, unknown>);
+}
+
+export async function canManageClients() {
+  if (!hasSupabaseEnv()) {
+    return false;
+  }
+
+  const { user } = await getAuthenticatedUser();
+  return Boolean(user);
 }

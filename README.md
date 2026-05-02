@@ -7,6 +7,7 @@ A minimal invoice creator built with Next.js 15, App Router, TypeScript, Tailwin
 - Dashboard for saved invoices
 - Company profile management with reusable sender details
 - Client profile management with reusable billing details
+- Supabase email/password login for user-scoped client profiles
 - Create, edit, view, print, and delete invoices
 - Dynamic line items with automatic subtotal, tax, and total calculation
 - Supabase-backed persistence using server actions
@@ -20,6 +21,7 @@ A minimal invoice creator built with Next.js 15, App Router, TypeScript, Tailwin
 - TypeScript strict mode
 - Tailwind CSS v3
 - Supabase PostgreSQL
+- Supabase Auth SSR helpers
 - React Hook Form
 - Zod
 
@@ -36,6 +38,7 @@ npm install
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 3. Run the Supabase migration.
@@ -86,11 +89,15 @@ The app uses two tables:
 
 Invoices reference a saved company profile through `company_id` and may also reference a saved client profile through `client_id`. Edits replace the associated line items for an invoice after updating the parent invoice. Deleting an invoice also deletes its line items through `on delete cascade`.
 
-## Auth Readiness
+## Auth
 
-Supabase Auth is optional in this version. The app is structured with dedicated Supabase utilities in `lib/supabase` so authenticated server and browser clients can be introduced later without reshaping the page and form layers.
+The app now includes a minimal Supabase Auth flow for reusable client profiles:
 
-Because this version allows invoice creation and company management without sign-in, the included RLS policies currently allow `anon` and `authenticated` access to the `companies`, `invoices`, and `invoice_items` tables. Once auth is added, these policies should be tightened to user-scoped rules.
+- Visit `/login` to sign up or log in with email and password
+- Middleware and SSR helpers keep the Supabase session available to server components and server actions
+- Client profile CRUD is user-scoped through RLS and requires a signed-in user
+
+Because this version still allows invoice creation and company management without sign-in, the included RLS policies currently allow `anon` and `authenticated` access to the `companies`, `invoices`, and `invoice_items` tables. If you later add per-user ownership for invoices and companies, tighten those policies to user-scoped rules too.
 
 The `clients` table is already user-scoped. Its policies allow authenticated users to manage only their own client records via `user_id = auth.uid()`. That means reusable client profiles require a real Supabase auth session, while manual invoice client entry still works without one.
 
