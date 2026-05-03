@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Image from "next/image";
 import { login } from "@/app/login/actions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,12 +14,21 @@ export default async function LoginPage({
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-md space-y-6">
-        <div className="space-y-2">
-          <Link href="/" className="text-sm text-slate-500 hover:text-slate-900">
-            Back to app
-          </Link>
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-950">Sign in</h1>
-          <p className="text-sm text-slate-500">Sign in with the account provided by your admin.</p>
+        <div className="space-y-3 text-center">
+          <div className="flex justify-center">
+            <Image
+              src="/invoice-creator-logo.svg"
+              alt="Invoice Creator logo"
+              width={96}
+              height={96}
+              className="h-24 w-24"
+              priority
+            />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-950">Sign in</h1>
+            <p className="text-sm text-slate-500">Sign in with the account provided by your admin.</p>
+          </div>
         </div>
 
         <Card className="p-6">
